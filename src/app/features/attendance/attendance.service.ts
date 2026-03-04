@@ -1,8 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
+
+// ── Shared API envelope ───────────────────────────────────────────────────────
+
+interface ApiResponse<T> {
+  data: T;
+}
 
 // ── Domain types ──────────────────────────────────────────────────────────────
 
@@ -80,13 +86,13 @@ export class AttendanceService {
   // ── Classes & sections (for teacher picker) ──────────────────────────────
 
   getClasses(): Observable<ClassItem[]> {
-    return this.http.get<{ success: boolean; data: ClassItem[] }>(
+    return this.http.get<ApiResponse<ClassItem[]>>(
       this.base('classes')
     ).pipe(map(r => r.data));
   }
 
   getSections(classId: string): Observable<SectionItem[]> {
-    return this.http.get<{ success: boolean; data: SectionItem[] }>(
+    return this.http.get<ApiResponse<SectionItem[]>>(
       this.base(`classes/${classId}/sections`)
     ).pipe(map(r => r.data));
   }
@@ -95,9 +101,9 @@ export class AttendanceService {
 
   /** Load teacher roster: enrolled students + today's attendance status. */
   getSectionRoster(sectionId: string, date: string): Observable<SectionRoster> {
-    return this.http.get<{ success: boolean; data: SectionRoster }>(
+    return this.http.get<ApiResponse<SectionRoster>>(
       this.base(`attendance/section/${sectionId}`),
-      { params: { date } }
+      { params: new HttpParams().set('date', date) }
     ).pipe(map(r => r.data));
   }
 
@@ -111,15 +117,18 @@ export class AttendanceService {
 
   /** Parent view: last 7 days for one student. */
   getStudentHistory(studentId: string): Observable<AttendanceDay[]> {
-    return this.http.get<{ success: boolean; data: AttendanceDay[] }>(
+    return this.http.get<ApiResponse<AttendanceDay[]>>(
       this.base(`attendance/student/${studentId}`)
     ).pipe(map(r => r.data));
   }
 
   /** Principal dashboard: stats + repeat absentees. */
   getDashboard(date?: string): Observable<DashboardData> {
-    const params = date ? { date } : {};
-    return this.http.get<{ success: boolean; data: DashboardData }>(
+    let params = new HttpParams();
+    if (date) {
+      params = params.set('date', date);
+    }
+    return this.http.get<ApiResponse<DashboardData>>(
       this.base('attendance/dashboard'),
       { params }
     ).pipe(map(r => r.data));

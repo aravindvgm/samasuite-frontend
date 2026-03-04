@@ -363,6 +363,14 @@ export class TeacherAttendanceComponent implements OnInit, OnDestroy, DoCheck {
 
   // ─────────────────────────────────────────────────────────────────────────
 
+  trackByClassId(_: number, c: ClassItem): string {
+    return c.id;
+  }
+
+  trackBySectionId(_: number, s: SectionItem): string {
+    return s.id;
+  }
+
   trackByStudentId(_: number, s: DisplayStudent): string {
     return s.student_id;
   }

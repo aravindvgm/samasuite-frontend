@@ -8,7 +8,7 @@ import { map, tap } from 'rxjs/operators';
 })
 export class AuthService {
 
-  /** Access token held in memory only — never written to localStorage/sessionStorage. */
+  /** Access token stored in memory only */
   private accessToken: string | null = null;
   private currentUserId: string | null = null;
   private currentOrgId: string | null = null;
@@ -16,14 +16,63 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
+  // --------------------------------------------------
+  // LOGIN
+  // --------------------------------------------------
+
+  login(payload: {
+    organizationId: string;
+    email: string;
+    password: string;
+  }): Observable<string> {
+    return this.http.post<{ token: string }>(
+      '/auth/login',
+      payload,
+      { withCredentials: true }
+    ).pipe(
+      tap(response => {
+        this.setAccessToken(response.token);
+      }),
+      map(response => response.token)
+    );
+  }
+
+  // --------------------------------------------------
+  // REFRESH TOKEN
+  // --------------------------------------------------
+
+  refreshToken(): Observable<string> {
+    return this.http.post<{ token: string }>(
+      '/auth/refresh',
+      {},
+      { withCredentials: true }
+    ).pipe(
+      tap(response => {
+        this.setAccessToken(response.token);
+      }),
+      map(response => response.token)
+    );
+  }
+
+  // --------------------------------------------------
+  // TOKEN HANDLING
+  // --------------------------------------------------
+
   setAccessToken(token: string): void {
     this.accessToken = token;
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      this.currentUserId = payload.sub ?? null;
-      this.currentOrgId = payload.organizationId ?? null;
-      this.currentRoles = payload.role ? [payload.role] : [];
+
+      this.currentUserId = payload?.sub ?? null;
+      this.currentOrgId = payload?.organizationId ?? null;
+
+      if (payload?.role) {
+        this.currentRoles = [payload.role];
+      } else {
+        this.currentRoles = [];
+      }
+
     } catch {
       this.currentUserId = null;
       this.currentOrgId = null;
@@ -51,32 +100,14 @@ export class AuthService {
     return this.currentRoles.includes(role);
   }
 
-  /**
-   * Clears the in-memory access token and all decoded claims.
-   * Called by AuthInterceptor on unrecoverable 401; callers handle navigation.
-   */
+  // --------------------------------------------------
+  // LOGOUT
+  // --------------------------------------------------
+
   logout(): void {
     this.accessToken = null;
     this.currentUserId = null;
     this.currentOrgId = null;
     this.currentRoles = [];
-  }
-
-  /**
-   * Exchanges the HttpOnly refresh-token cookie for a new access token.
-   * withCredentials: true is required so the browser sends the cookie.
-   * The raw refresh token is never read or stored by Angular.
-   */
-  refreshToken(): Observable<string> {
-    return this.http.post<{ token: string }>(
-      '/auth/refresh',
-      {},
-      { withCredentials: true }
-    ).pipe(
-      tap(response => {
-        this.setAccessToken(response.token);
-      }),
-      map(response => response.token)
-    );
   }
 }

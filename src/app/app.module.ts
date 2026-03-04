@@ -1,6 +1,7 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';   // ⭐ ADD THIS
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -10,7 +11,6 @@ import { SidebarComponent } from './shared/sidebar/sidebar.component';
 import { HasRoleDirective } from './core/directives/has-role.directive';
 import { AuthBootstrapService } from './core/services/auth-bootstrap.service';
 
-// Attendance feature
 import { TeacherAttendanceComponent } from './features/attendance/teacher-attendance/teacher-attendance.component';
 import { ParentAttendanceComponent } from './features/attendance/parent-attendance/parent-attendance.component';
 import { PrincipalDashboardComponent } from './features/attendance/principal-dashboard/principal-dashboard.component';
@@ -22,7 +22,6 @@ import { PrincipalDashboardComponent } from './features/attendance/principal-das
     OrgSelectorComponent,
     SidebarComponent,
     HasRoleDirective,
-    // Attendance
     TeacherAttendanceComponent,
     ParentAttendanceComponent,
     PrincipalDashboardComponent,
@@ -30,6 +29,7 @@ import { PrincipalDashboardComponent } from './features/attendance/principal-das
   imports: [
     BrowserModule,
     HttpClientModule,
+    FormsModule,            // ⭐ VERY IMPORTANT
     AppRoutingModule
   ],
   providers: [

@@ -9,7 +9,7 @@
       [value]="selectedClassId"
       (change)="onClassChange($any($event.target).value)">
       <option value="">Select class</option>
-      <option *ngFor="let c of classes; trackBy: trackByStudentId" [value]="c.id">
+      <option *ngFor="let c of classes; trackBy: trackByClassId" [value]="c.id">
         {{ c.name }}
       </option>
     </select>
@@ -20,7 +20,7 @@
       [disabled]="!sections.length"
       (change)="onSectionChange($any($event.target).value)">
       <option value="">Select section</option>
-      <option *ngFor="let s of sections; trackBy: trackByStudentId" [value]="s.id">
+      <option *ngFor="let s of sections; trackBy: trackBySectionId" [value]="s.id">
         {{ s.name }}
       </option>
     </select>
